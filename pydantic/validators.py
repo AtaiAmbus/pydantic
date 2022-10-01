@@ -463,8 +463,8 @@ def callable_validator(v: Any) -> AnyCallable:
     raise errors.CallableError(value=v)
 
 
-def enum_validator(v: Any) -> Enum:
-    if isinstance(v, Enum):
+def enum_validator(v: Any, field: 'ModelField') -> Enum:
+    if isinstance(v, field.type_):
         return v
 
     raise errors.EnumError(value=v)
@@ -724,7 +724,7 @@ def find_validators(  # noqa: C901 (ignore complexity)
     if is_builtin_dataclass(type_):
         yield from make_dataclass_validator(type_, config)
         return
-    if type_ is Enum:
+    if issubclass(type_, Enum) and not issubclass(type_, IntEnum) and len(list(type_)) == 0:
         yield enum_validator
         return
     if type_ is IntEnum:
